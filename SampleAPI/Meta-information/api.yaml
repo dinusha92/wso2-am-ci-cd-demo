@@ -1,0 +1,20 @@
+id:
+  providerName: admin
+  apiName: InternalJYSKWSSAPInew
+  version: v1
+description: Internal JYSK WSS API
+type: HTTP
+context: /internalnew/api/v2
+contextTemplate: /internalnew/api/{version}
+tags:
+- GDPR Query
+- GK special handling
+- Issue management
+- Order Administration
+availableTiers:
+- name: Unlimited
+status: PUBLISHED
+visibility: public
+transports: http,https
+productionUrl: http://localhost:8080
+sandboxUrl: http://localhost:8081

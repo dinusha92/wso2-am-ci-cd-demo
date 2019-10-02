@@ -1,0 +1,591 @@
+swagger: "2.0"
+info:
+  description: Internal JYSK WSS API
+  version: v2
+  title: InternalJYSKWSSAPInew
+basePath: /internalnew/api
+tags:
+- name: GDPR Query
+- name: GK special handling
+- name: Issue management
+- name: Order Administration
+schemes:
+- http
+- https
+paths:
+  /gdpr/search:
+    post:
+      tags:
+      - GDPR Query
+      summary: Searches WSS special handling orders synchronized from GK.
+      description: ""
+      operationId: search
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: email
+        in: query
+        required: false
+        type: string
+      responses:
+        "200":
+          description: Search executed OK
+        "500":
+          description: Server error
+  /specialhandling/filter/{longStoreId}:
+    get:
+      tags:
+      - GK special handling
+      summary: Loads a page of orders relevant for the frontend. Pages are segmented
+        by stores and order state groups. See SHOrderStateGroup for possible input.
+      description: ""
+      operationId: filter
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: longStoreId
+        in: path
+        required: true
+        type: string
+      - name: orderStateGroup
+        in: query
+        required: false
+        type: string
+        enum:
+        - COMPLETED
+        - UNCOMPLETED
+        - FULFILLED
+        - ARRIVED_AT_STORE
+        - OVERDUE
+      - name: includeLines
+        in: query
+        required: false
+        type: boolean
+      - name: first
+        in: query
+        required: false
+        type: integer
+        format: int32
+      - name: pageSize
+        in: query
+        required: false
+        type: integer
+        format: int32
+      - name: sortField
+        in: query
+        required: false
+        type: string
+      - name: sortOrder
+        in: query
+        required: false
+        type: string
+      responses:
+        "200":
+          description: Returned page without error.
+        "400":
+          description: Bad request, check input.
+        "500":
+          description: Server error.
+  /specialhandling/search/{longSiteId}:
+    post:
+      tags:
+      - GK special handling
+      summary: Searches WSS special handling orders synchronized from GK.
+      description: ""
+      operationId: search
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: longSiteId
+        in: path
+        required: true
+        type: string
+      - name: searchTerm
+        in: query
+        required: false
+        type: string
+      - name: orderStateGroup
+        in: query
+        required: false
+        type: string
+        enum:
+        - COMPLETED
+        - UNCOMPLETED
+        - FULFILLED
+        - ARRIVED_AT_STORE
+        - OVERDUE
+      - name: first
+        in: query
+        required: false
+        type: integer
+        format: int32
+      - name: pageSize
+        in: query
+        required: false
+        type: integer
+        format: int32
+      - name: sortField
+        in: query
+        required: false
+        type: string
+      - name: sortOrder
+        in: query
+        required: false
+        type: string
+      - name: includeLines
+        in: query
+        required: false
+        type: boolean
+      responses:
+        "200":
+          description: Search executed OK
+        "500":
+          description: Server error
+  /specialhandling/{externalOrderId}:
+    get:
+      tags:
+      - GK special handling
+      summary: Loads a special handling order by unique external order ID.
+      description: ""
+      operationId: loadByExternalOrderId
+      produces:
+      - application/json
+      parameters:
+      - name: externalOrderId
+        in: path
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Order found
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+    post:
+      tags:
+      - GK special handling
+      summary: Updates an order according to request sent
+      description: ""
+      operationId: updateOrder
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: externalOrderId
+        in: path
+        required: true
+        type: string
+      - in: body
+        name: body
+        required: false
+        schema:
+          $ref: '#/definitions/SHOrderUpdateRequest'
+      responses:
+        "200":
+          description: Order found
+        "400":
+          description: Bad request, check input
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+  /specialhandling/fetchlist:
+    get:
+      tags:
+      - GK special handling
+      summary: Loads multiple special handling orders by external order ID. Assumes
+        they are from the same country.
+      description: ""
+      operationId: fetchList
+      produces:
+      - application/json
+      parameters:
+      - name: externalOrderId
+        in: query
+        required: false
+        type: array
+        items:
+          type: string
+        collectionFormat: multi
+      responses:
+        "200":
+          description: Order found
+        "404":
+          description: One or more orders not found.
+        "500":
+          description: Server error
+  /specialhandling/{externalOrderId}/correspondenceList:
+    get:
+      tags:
+      - GK special handling
+      summary: Loads the correspondence list for a special handling order. This will
+        include internal messages as well as SMS messages sent.
+      description: ""
+      operationId: loadCorrespondenceList
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: externalOrderId
+        in: path
+        required: true
+        type: string
+      responses:
+        "200":
+          description: List returned successfully.
+        "400":
+          description: Bad request, check input
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+  /specialhandling/{externalOrderId}/markArrivedInStore:
+    post:
+      tags:
+      - GK special handling
+      summary: DEPRECATED! Marks the order as Arrived in store. Sets a timestamp on
+        the order and executes any necessary tasks.
+      description: ""
+      operationId: markArrivedInStore
+      parameters:
+      - name: externalOrderId
+        in: path
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Order updated successfully.
+        "400":
+          description: Bad request, check input
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+      deprecated: true
+  /specialhandling/{externalOrderId}/markArrived:
+    post:
+      tags:
+      - GK special handling
+      summary: Marks the order as Arrived in store. Sets a timestamp on the order
+        and executes any necessary tasks.
+      description: ""
+      operationId: arrivedInStore
+      parameters:
+      - in: body
+        name: body
+        required: false
+        schema:
+          $ref: '#/definitions/UpdateOrderStateRequest'
+      responses:
+        "200":
+          description: Order updated successfully.
+        "400":
+          description: Bad request, check input
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+  /specialhandling/{orderId}/picked-notification-templates:
+    get:
+      tags:
+      - GK special handling
+      summary: Loads a list of available templates for the order when picking it.
+      description: ""
+      operationId: loadPickedNotificationTemplates
+      produces:
+      - application/json
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        type: string
+      responses:
+        "200":
+          description: Returned templates
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+  /issue/context:
+    get:
+      tags:
+      - Issue management
+      summary: Load issue context
+      description: Load context needed for creating issues.
+      operationId: getContext
+      produces:
+      - application/json
+      parameters:
+      - name: externalOrderId
+        in: query
+        required: false
+        type: string
+      - name: orderType
+        in: query
+        required: false
+        type: string
+        enum:
+        - ONLINE_SALES
+        - HOME_DELIVERY
+        - CLICK_COLLECT
+        - RETURN_REPLACE
+        - SMOS
+        - AMAZON_SALES
+        - GIFT_CARD
+        - GIFT_CARD_COMPENSATION
+        - SPECIAL_HANDLING
+        - PRICE_LOCK
+      responses:
+        "200":
+          description: OK. Context returned.
+        "400":
+          description: Missing parameters
+        "500":
+          description: Server error
+  /order-administration/{orderId}/correspondence:
+    get:
+      tags:
+      - Order Administration
+      summary: Loads the correspondence list for an order. This will include internal
+        messages as well as SMS messages sent.
+      description: ""
+      operationId: loadCorrespondenceList
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      parameters:
+      - name: orderId
+        in: path
+        required: true
+        type: integer
+        format: int32
+      responses:
+        "200":
+          description: List returned successfully.
+        "400":
+          description: Bad request, check input
+        "404":
+          description: Order not found
+        "500":
+          description: Server error
+  /order-administration/oopus/pickup:
+    post:
+      tags:
+      - Order Administration
+      summary: Should be called when customer picks up OOPUS order from a store.
+      description: ""
+      operationId: onOOPUSPickup
+      consumes:
+      - application/json
+      parameters:
+      - in: body
+        name: body
+        required: false
+        schema:
+          $ref: '#/definitions/UpdateOrderStateRequest'
+      responses:
+        "200":
+          description: Order updated OK.
+        "400":
+          description: Missing or incorrect arguments.
+        "500":
+          description: Unknown error
+definitions:
+  SHAddressDTO:
+    type: object
+    properties:
+      zipCode:
+        type: string
+      city:
+        type: string
+      street:
+        type: string
+      co:
+        type: string
+  SHOrderDTO:
+    type: object
+    properties:
+      externalOrderId:
+        type: string
+      orderType:
+        type: string
+      orderStatus:
+        type: string
+      orderNumber:
+        type: string
+      overdue:
+        type: boolean
+      customerFirstName:
+        type: string
+      customerLastName:
+        type: string
+      phone:
+        type: string
+      deliveryDate:
+        type: string
+        format: date-time
+      arrivedInStore:
+        type: string
+        format: date-time
+      address:
+        $ref: '#/definitions/SHAddressDTO'
+      lines:
+        type: array
+        items:
+          $ref: '#/definitions/SHOrderLineDTO'
+      alreadyPaidAmount:
+        type: number
+        format: double
+      totalAmount:
+        type: number
+        format: double
+      correspondenceSent:
+        type: boolean
+      issueWaiting:
+        type: boolean
+      issueCreated:
+        type: boolean
+      orderStatusText:
+        type: string
+  SHOrderLineDTO:
+    type: object
+    properties:
+      handoutStateCode:
+        type: string
+      goodsAvailabilityStateCode:
+        type: string
+      article:
+        type: string
+      articleStatus:
+        type: string
+      quantity:
+        type: number
+        format: double
+      articleText:
+        type: string
+      handoutStateCodeText:
+        type: string
+      goodsAvailabilityStateCodeText:
+        type: string
+      status:
+        type: string
+      statusText:
+        type: string
+  SHSearchResponse:
+    type: object
+    properties:
+      orders:
+        type: array
+        items:
+          $ref: '#/definitions/SHOrderDTO'
+      totalResults:
+        type: integer
+        format: int64
+  SHOrderUpdateRequest:
+    type: object
+    properties:
+      userName:
+        type: string
+      deliveryDate:
+        type: string
+        format: date-time
+      sendAsSms:
+        type: boolean
+      message:
+        type: string
+      phone:
+        type: string
+      updatedAddress:
+        $ref: '#/definitions/SHAddressDTO'
+  IdentificationDTO:
+    type: object
+    properties:
+      type:
+        type: string
+      legitimizationNumber:
+        type: string
+      signature:
+        $ref: '#/definitions/SignatureDTO'
+      otherType:
+        type: string
+  SignatureDTO:
+    type: object
+    properties:
+      signatureData:
+        type: string
+      filename:
+        type: string
+  TextTemplateDTO:
+    type: object
+    properties:
+      type:
+        type: string
+      id:
+        type: string
+      content:
+        type: string
+      label:
+        type: string
+      allowUserInput:
+        type: boolean
+  UpdateOrderStateRequest:
+    type: object
+    properties:
+      orderId:
+        type: string
+      notificationTemplate:
+        $ref: '#/definitions/TextTemplateDTO'
+      orderType:
+        type: string
+      identification:
+        $ref: '#/definitions/IdentificationDTO'
+  IssueContextDTO:
+    type: object
+    properties:
+      types:
+        type: array
+        items:
+          $ref: '#/definitions/IssueTypeDTO'
+      orderType:
+        type: string
+      externalOrderId:
+        type: string
+      storeId:
+        type: string
+      locale:
+        type: string
+  IssueTypeDTO:
+    type: object
+    properties:
+      type:
+        type: string
+      translation:
+        type: string
+  CorrespondenceDTO:
+    type: object
+    properties:
+      key:
+        type: string
+      date:
+        type: string
+        format: date-time
+      text:
+        type: string
+      channel:
+        type: string
+      from:
+        type: string
+      to:
+        type: string
+      textHeader:
+        type: string

@@ -1,0 +1,11 @@
+environments:
+  - name: prod
+    endpoints:
+      production:
+        url: 'https://prod.wso2.com'
+      sandbox:
+  - name: test
+    endpoints:
+      production:
+        url: 'https://test.wso2.com'
+      sandbox:
